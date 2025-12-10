@@ -1,0 +1,17 @@
+# Binaries
+bin/
+*.exe
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+
+# Dependencies
+vendor/
+
+# OS
+.DS_Store
