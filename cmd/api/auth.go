@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"project-management-system/internal/store"
 	"strings"
 	"time"
+
+	"github.com/Mx-Tr/pms-go/internal/store"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5"

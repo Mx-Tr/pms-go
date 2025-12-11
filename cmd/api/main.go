@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"project-management-system/internal/config"
-	"project-management-system/internal/store"
+
+	"github.com/Mx-Tr/pms-go/internal/config"
+	"github.com/Mx-Tr/pms-go/internal/store"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

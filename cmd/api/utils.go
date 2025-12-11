@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 )
 
 type User struct {
@@ -22,15 +21,22 @@ func (app *Application) WriteJSON(w http.ResponseWriter, status int, data interf
 	return json.NewEncoder(w).Encode(data)
 }
 
-func (app *Application) UserValidate(w http.ResponseWriter, user *User) []ValidationError {
-	var errors []ValidationError
-
-	if !strings.Contains(user.Email, "@") {
-		errors = append(errors, ValidationError{"email", "Invalid format"})
+func (app *Application) GetStringOrEmpty(s *string) string {
+	if s == nil {
+		return ""
 	}
-	if len(user.Password) < 8 {
-		errors = append(errors, ValidationError{"password", "Must be 8+ chars"})
-	}
-
-	return errors
+	return *s
 }
+
+//func (app *Application) UserValidate(w http.ResponseWriter, user *User) []ValidationError {
+//	var errors []ValidationError
+//
+//	if !strings.Contains(user.Email, "@") {
+//		errors = append(errors, ValidationError{"email", "Invalid format"})
+//	}
+//	if len(user.Password) < 8 {
+//		errors = append(errors, ValidationError{"password", "Must be 8+ chars"})
+//	}
+//
+//	return errors
+//}

@@ -3,8 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
-	"project-management-system/internal/config"
-	"project-management-system/internal/store"
+
+	"github.com/Mx-Tr/pms-go/internal/config"
+	"github.com/Mx-Tr/pms-go/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -33,6 +34,7 @@ func (app *Application) Mount() http.Handler {
 			r.Use(app.AuthMiddleware)
 
 			r.Get("/users/me", app.GetCurrentUserHandler)
+			r.Post("/projects/create", app.CreateProjectHandler)
 		})
 	})
 
