@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"reflect"
 )
 
 type User struct {
@@ -26,6 +27,16 @@ func (app *Application) GetStringOrEmpty(s *string) string {
 		return ""
 	}
 	return *s
+}
+
+func (app *Application) isAllNil(v interface{}) bool {
+	value := reflect.ValueOf(v)
+	for i := 0; i < value.NumField(); i++ {
+		if !value.Field(i).IsNil() {
+			return false
+		}
+	}
+	return true
 }
 
 //func (app *Application) UserValidate(w http.ResponseWriter, user *User) []ValidationError {

@@ -34,7 +34,10 @@ func (app *Application) Mount() http.Handler {
 			r.Use(app.AuthMiddleware)
 
 			r.Get("/users/me", app.GetCurrentUserHandler)
+
+			r.Get("/projects/getAll", app.GetProjectsHandler)
 			r.Post("/projects/create", app.CreateProjectHandler)
+			r.Patch("/projects/update/{id}", app.UpdateProjectHandler)
 		})
 	})
 
