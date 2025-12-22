@@ -50,9 +50,6 @@ func (app *Application) CreateProjectHandler(w http.ResponseWriter, r *http.Requ
 }
 
 func (app *Application) GetProjectsHandler(w http.ResponseWriter, r *http.Request) {
-	// TODO вопрос по поводу названия методов и реалистичного расширения.
-	// Не понимаю нужно ли будет для "админа" писать доп правила при получении проектов или
-	// нужно будет делать отдельные методы? Узнать.
 	ownerId, ok := r.Context().Value("userId").(int)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
