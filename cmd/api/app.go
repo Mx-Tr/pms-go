@@ -38,6 +38,7 @@ func (app *Application) Mount() http.Handler {
 			r.Get("/projects/getAll", app.GetProjectsHandler)
 			r.Post("/projects/create", app.CreateProjectHandler)
 			r.Patch("/projects/update/{id}", app.UpdateProjectHandler)
+			r.Delete("/projects/delete/{id}", app.DeleteProjectHandler)
 		})
 	})
 

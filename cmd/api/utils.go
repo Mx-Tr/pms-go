@@ -38,16 +38,3 @@ func (app *Application) isAllNil(v interface{}) bool {
 	}
 	return true
 }
-
-//func (app *Application) UserValidate(w http.ResponseWriter, user *User) []ValidationError {
-//	var errors []ValidationError
-//
-//	if !strings.Contains(user.Email, "@") {
-//		errors = append(errors, ValidationError{"email", "Invalid format"})
-//	}
-//	if len(user.Password) < 8 {
-//		errors = append(errors, ValidationError{"password", "Must be 8+ chars"})
-//	}
-//
-//	return errors
-//}

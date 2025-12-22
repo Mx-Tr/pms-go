@@ -41,24 +41,24 @@ func (app *Application) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// 4. Достаем userID из claims
+		// 4. Достаем userId из claims
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			http.Error(w, "Invalid user ID in token", http.StatusUnauthorized)
+			http.Error(w, "Invalid user Id in token", http.StatusUnauthorized)
 			return
 		}
 
 		// В JSON числа превращаются в float64, поэтому нужно приведение типов
-		userIDFloat, ok := claims["sub"].(float64)
+		userIdFloat, ok := claims["sub"].(float64)
 		if !ok {
-			http.Error(w, "Invalid user ID in token", http.StatusUnauthorized)
+			http.Error(w, "Invalid user Id in token", http.StatusUnauthorized)
 			return
 		}
-		userID := int(userIDFloat)
+		userId := int(userIdFloat)
 
-		// 5. Кладем userID в контекст.
+		// 5. Кладем userId в контекст.
 		// TODO Используем строковый ключ "userId" (в продакшене лучше использовать спец. тип, но пока так)
-		ctx := context.WithValue(r.Context(), "userID", userID)
+		ctx := context.WithValue(r.Context(), "userId", userId)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

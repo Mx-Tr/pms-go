@@ -13,6 +13,12 @@ import (
 )
 
 func (app *Application) CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value("userId").(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var payload struct {
 		Name        string  `json:"name"`
 		Description *string `json:"description"`
@@ -27,16 +33,10 @@ func (app *Application) CreateProjectHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	userID, ok := r.Context().Value("userID").(int)
-	if !ok {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
 	project := &store.Project{
 		Name:        payload.Name,
 		Description: app.GetStringOrEmpty(payload.Description),
-		OwnerID:     userID,
+		OwnerId:     userId,
 	}
 
 	if err := app.store.Projects.Create(r.Context(), project); err != nil {
@@ -52,13 +52,13 @@ func (app *Application) GetProjectsHandler(w http.ResponseWriter, r *http.Reques
 	// TODO вопрос по поводу названия методов и реалистичного расширения.
 	// Не понимаю нужно ли будет для "админа" писать доп правила при получении проектов или
 	// нужно будет делать отдельные методы? Узнать.
-	ownerID, ok := r.Context().Value("userID").(int)
+	ownerId, ok := r.Context().Value("userId").(int)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	rows, err := app.store.Projects.GetAll(r.Context(), ownerID)
+	rows, err := app.store.Projects.GetAll(r.Context(), ownerId)
 	if err != nil {
 		fmt.Println("DB Error:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -71,7 +71,7 @@ func (app *Application) GetProjectsHandler(w http.ResponseWriter, r *http.Reques
 	for rows.Next() {
 		var p store.Project
 
-		if err := rows.Scan(&p.ID, &p.Name, &p.Description, &p.OwnerID, &p.CreatedAt); err != nil {
+		if err := rows.Scan(&p.Id, &p.Name, &p.Description, &p.OwnerId, &p.CreatedAt); err != nil {
 			fmt.Println("Scan Error:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
@@ -89,21 +89,21 @@ func (app *Application) GetProjectsHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *Application) UpdateProjectHandler(w http.ResponseWriter, r *http.Request) {
-	// текущий userID передадим в Update для проверки доступа
-	userID, ok := r.Context().Value("userID").(int)
+	// текущий userId передадим в Update для проверки доступа
+	userId, ok := r.Context().Value("userId").(int)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	projectIDStr := chi.URLParam(r, "id")
-	projectID, err := strconv.Atoi(projectIDStr)
+	projectIdStr := chi.URLParam(r, "id")
+	projectId, err := strconv.Atoi(projectIdStr)
 	if err != nil {
 		http.Error(w, "Invalid projects id", http.StatusBadRequest)
 		return
 	}
 
-	project, err := app.store.Projects.GetById(r.Context(), projectID, userID)
+	project, err := app.store.Projects.GetById(r.Context(), projectId, userId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			http.Error(w, "Project not found", http.StatusNotFound)
@@ -117,7 +117,7 @@ func (app *Application) UpdateProjectHandler(w http.ResponseWriter, r *http.Requ
 	var payload struct {
 		Name        *string `json:"name"`
 		Description *string `json:"description"`
-		OwnerID     *int    `json:"ownerID"`
+		OwnerId     *int    `json:"ownerId"`
 	}
 	err = json.NewDecoder(r.Body).Decode(&payload)
 	if err != nil {
@@ -139,11 +139,11 @@ func (app *Application) UpdateProjectHandler(w http.ResponseWriter, r *http.Requ
 	if payload.Description != nil {
 		project.Description = *payload.Description
 	}
-	if payload.OwnerID != nil {
-		project.OwnerID = *payload.OwnerID
+	if payload.OwnerId != nil {
+		project.OwnerId = *payload.OwnerId
 	}
 
-	err = app.store.Projects.Update(r.Context(), project, userID)
+	err = app.store.Projects.Update(r.Context(), project, userId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			http.Error(w, "Project not found", http.StatusNotFound)
@@ -155,4 +155,32 @@ func (app *Application) UpdateProjectHandler(w http.ResponseWriter, r *http.Requ
 	}
 
 	app.WriteJSON(w, http.StatusOK, project)
+}
+
+func (app *Application) DeleteProjectHandler(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value("userId").(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	projectIdStr := chi.URLParam(r, "id")
+
+	projectId, err := strconv.Atoi(projectIdStr)
+	if err != nil {
+		http.Error(w, "Invalid id", http.StatusBadRequest)
+		return
+	}
+
+	err = app.store.Projects.Delete(r.Context(), projectId, userId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			http.Error(w, "Project not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
