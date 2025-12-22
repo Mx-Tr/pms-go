@@ -65,8 +65,8 @@ func (app *Application) GetProjectsHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	defer rows.Close()
-
-	var projects []store.Project
+	// Чтобы на фронт не приходил null, пусть туда приходит []
+	projects := []store.Project{}
 
 	for rows.Next() {
 		var p store.Project
