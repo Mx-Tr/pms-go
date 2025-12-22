@@ -59,9 +59,6 @@ func (r *ProjectsRepository) GetAll(ctx context.Context, ownerId int) (pgx.Rows,
 
 func (r *ProjectsRepository) Update(ctx context.Context, project *Project, oldOwnerId int) error {
 	query := `UPDATE projects SET name = $1, description = $2, owner_id = $3 WHERE id = $4 and owner_id = $5`
-	// TODO Также ошибка, когда владелец проекта пытается поменять проект на несуществующий Id
-	// в консоли возвращается "DB Error: ERROR: insert or update on table "projects" violates foreign key constraint "projects_owner_id_fkey" (SQLSTATE 23503)"
-
 	tag, err := r.db.Exec(
 		ctx, query,
 		project.Name,

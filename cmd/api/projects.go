@@ -10,6 +10,7 @@ import (
 	"github.com/Mx-Tr/pms-go/internal/store"
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func (app *Application) CreateProjectHandler(w http.ResponseWriter, r *http.Request) {
@@ -147,6 +148,12 @@ func (app *Application) UpdateProjectHandler(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			http.Error(w, "Project not found", http.StatusNotFound)
+		}
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23503" { // код foreign_key_violation
+				http.Error(w, "New owner user does not exist", http.StatusBadRequest)
+			}
 		} else {
 			fmt.Println("DB Error:", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
