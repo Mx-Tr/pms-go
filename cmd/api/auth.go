@@ -112,7 +112,7 @@ func (app *Application) LoginUserHandler(w http.ResponseWriter, r *http.Request)
 	// 3. Генерируем JWT
 	// Claims это данные, зашитые в токен (payload)
 	claims := jwt.MapClaims{
-		"sub": user.ID,                               // Subject (Обычно ID пользователя)
+		"sub": user.Id,                               // Subject (Обычно Id пользователя)
 		"exp": time.Now().Add(time.Hour * 24).Unix(), // Expire (срок жизни - 24 часа)
 	}
 
@@ -130,14 +130,14 @@ func (app *Application) LoginUserHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (app *Application) GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
-	// Достаем ID из контекста, который положил туда наш Middleware
-	userID, ok := r.Context().Value("userID").(int)
+	// Достаем Id из контекста, который положил туда наш Middleware
+	userId, ok := r.Context().Value("userId").(int)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	user, err := app.store.Users.GetById(r.Context(), userID)
+	user, err := app.store.Users.GetById(r.Context(), userId)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			http.Error(w, "Invalid id", http.StatusBadRequest)

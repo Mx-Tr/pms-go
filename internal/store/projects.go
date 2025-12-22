@@ -33,7 +33,10 @@ func (r *ProjectsRepository) Create(ctx context.Context, project *Project) error
 func (r *ProjectsRepository) GetById(ctx context.Context, id int, ownerId int) (*Project, error) {
 	project := &Project{}
 
-	query := `SELECT id, name, description, owner_id, created_at FROM projects WHERE id = $1 AND owner_id = $2`
+	query := `
+			SELECT id, name, description, owner_id, created_at 
+			FROM projects WHERE id = $1 AND owner_id = $2
+			`
 
 	err := r.db.QueryRow(ctx, query, id, ownerId).Scan(
 		&project.Id,

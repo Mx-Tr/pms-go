@@ -39,6 +39,8 @@ func (app *Application) Mount() http.Handler {
 			r.Post("/projects/create", app.CreateProjectHandler)
 			r.Patch("/projects/update/{id}", app.UpdateProjectHandler)
 			r.Delete("/projects/delete/{id}", app.DeleteProjectHandler)
+
+			r.Post("/projects/{projectId}/tasks", app.CreateTaskHandler)
 		})
 	})
 
