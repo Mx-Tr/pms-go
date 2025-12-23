@@ -1,1 +1,1 @@
-DROP TABLE IF EXIST task_assignees;
+DROP TABLE IF EXISTS task_assignees;
