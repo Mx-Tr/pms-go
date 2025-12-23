@@ -97,7 +97,7 @@ func (app *Application) UpdateProjectHandler(w http.ResponseWriter, r *http.Requ
 	projectIdStr := chi.URLParam(r, "id")
 	projectId, err := strconv.Atoi(projectIdStr)
 	if err != nil {
-		http.Error(w, "Invalid projects id", http.StatusBadRequest)
+		http.Error(w, "Invalid project id", http.StatusBadRequest)
 		return
 	}
 

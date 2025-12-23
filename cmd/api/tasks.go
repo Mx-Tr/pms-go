@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/Mx-Tr/pms-go/internal/store"
+	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/jackc/pgx/v5"
 )
@@ -21,11 +23,17 @@ func (app *Application) CreateTaskHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	projectIdStr := chi.URLParam(r, "projectId")
+	projectId, err := strconv.Atoi(projectIdStr)
+	if err != nil {
+		http.Error(w, "Invalid project id", http.StatusBadRequest)
+		return
+	}
+
 	var payload struct {
 		Name        string             `json:"name" validate:"required,min=1,max=200"`
 		Description *string            `json:"description"`
 		Priority    store.TaskPriority `json:"priority" validate:"required,oneof=low medium high urgent"`
-		ProjectId   int                `json:"projectId" validate:"required,min=1"`
 	}
 	// TODO написать ютилити readJSON функцию
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
@@ -39,7 +47,7 @@ func (app *Application) CreateTaskHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if _, err := app.store.Projects.GetById(r.Context(), payload.ProjectId, userId); err != nil {
+	if _, err := app.store.Projects.GetById(r.Context(), projectId, userId); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			http.Error(w, "Project not found", http.StatusBadRequest)
 		} else {
@@ -53,7 +61,7 @@ func (app *Application) CreateTaskHandler(w http.ResponseWriter, r *http.Request
 		Name:        payload.Name,
 		Description: app.GetStringOrEmpty(payload.Description),
 		Priority:    payload.Priority,
-		ProjectId:   payload.ProjectId,
+		ProjectId:   projectId,
 	}
 
 	if err := app.store.Tasks.Create(r.Context(), task); err != nil {
